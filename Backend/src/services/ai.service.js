@@ -153,7 +153,7 @@ Every array must follow the exact object structure defined above.
 
     const response = await ai.models.generateContent({
 
-        model: "gemini-3-flash-preview",
+        model: "gemini-4-carbon",
 
         contents: prompt,
 
@@ -262,7 +262,7 @@ IMPORTANT:
 
     const response = await ai.models.generateContent({
 
-        model: "gemini-3-flash-preview",
+        model: "gemini-4-carbon",
 
         contents: prompt,
 
