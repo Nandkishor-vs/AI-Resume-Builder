@@ -183,7 +183,10 @@ Every array must follow the exact object structure defined above.
 
 async function generatePdfFromHtml(htmlContent) {
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+});
 
     try {
 
