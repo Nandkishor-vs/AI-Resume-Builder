@@ -1,11 +1,11 @@
 {
   "name": "resume_builder",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "AI-Powered Interview Prep and Resume Builder",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "type": "commonjs",
