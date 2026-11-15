@@ -8,25 +8,18 @@ const {
 
 const interviewReportModel = require("../models/interviewReport.model");
 
-
-// ==========================================
-// GENERATE INTERVIEW REPORT
-// ==========================================
-
 async function generateInterViewReportController(req, res, next) {
 
     let parser;
 
     try {
 
-        // Validate uploaded file
         if (!req.file) {
             return res.status(400).json({
                 message: "Please upload your resume in PDF format."
             });
         }
 
-        // Validate request body
         const { selfDescription, jobDescription } = req.body;
 
         if (!selfDescription || !jobDescription) {
@@ -35,28 +28,24 @@ async function generateInterViewReportController(req, res, next) {
             });
         }
 
-        // Parse uploaded PDF
         parser = new pdfParse.PDFParse({
             data: req.file.buffer
         });
 
         const resumeContent = await parser.getText();
 
-        // Validate extracted PDF text
         if (!resumeContent.text || !resumeContent.text.trim()) {
             return res.status(400).json({
                 message: "Unable to extract text from the uploaded PDF."
             });
         }
 
-        // Generate interview report using Gemini AI
         const interViewReportByAi = await generateInterviewReport({
             resume: resumeContent.text,
             selfDescription,
             jobDescription
         });
 
-        // Save interview report in MongoDB
         const interviewReport = await interviewReportModel.create({
             user: req.user.id,
             resume: resumeContent.text,
@@ -83,25 +72,18 @@ async function generateInterViewReportController(req, res, next) {
     }
 }
 
-
-// ==========================================
-// GET INTERVIEW REPORT BY ID
-// ==========================================
-
 async function getInterviewReportByIdController(req, res, next) {
 
     try {
 
         const { interviewId } = req.params;
 
-        // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(interviewId)) {
             return res.status(400).json({
                 message: "Invalid interview report ID."
             });
         }
 
-        // Find report belonging to logged-in user
         const interviewReport = await interviewReportModel.findOne({
             _id: interviewId,
             user: req.user.id
@@ -124,11 +106,6 @@ async function getInterviewReportByIdController(req, res, next) {
 
     }
 }
-
-
-// ==========================================
-// GET ALL INTERVIEW REPORTS
-// ==========================================
 
 async function getAllInterviewReportsController(req, res, next) {
 
@@ -157,25 +134,18 @@ async function getAllInterviewReportsController(req, res, next) {
     }
 }
 
-
-// ==========================================
-// GENERATE RESUME PDF
-// ==========================================
-
 async function generateResumePdfController(req, res, next) {
 
     try {
 
         const { interviewReportId } = req.params;
 
-        // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(interviewReportId)) {
             return res.status(400).json({
                 message: "Invalid interview report ID."
             });
         }
 
-        // Find report belonging to logged-in user
         const interviewReport = await interviewReportModel.findOne({
             _id: interviewReportId,
             user: req.user.id
@@ -187,21 +157,18 @@ async function generateResumePdfController(req, res, next) {
             });
         }
 
-        // Extract saved report information
         const {
             resume,
             jobDescription,
             selfDescription
         } = interviewReport;
 
-        // Generate resume PDF using Gemini and Puppeteer
         const pdfBuffer = await generateResumePdf({
             resume,
             jobDescription,
             selfDescription
         });
 
-        // Set PDF response headers
         res.set({
             "Content-Type": "application/pdf",
             "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
@@ -215,11 +182,6 @@ async function generateResumePdfController(req, res, next) {
 
     }
 }
-
-
-// ==========================================
-// EXPORT CONTROLLERS
-// ==========================================
 
 module.exports = {
     generateInterViewReportController,

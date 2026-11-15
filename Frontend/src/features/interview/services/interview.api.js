@@ -5,7 +5,6 @@ const api = axios.create({
     withCredentials: true
 });
 
-// Generate interview report
 export const generateInterviewReport = async ({
     jobDescription,
     selfDescription,
@@ -26,7 +25,6 @@ export const generateInterviewReport = async ({
     return response.data;
 };
 
-// Get interview report by ID
 export const getInterviewReportById = async (interviewId) => {
 
     const response = await api.get(
@@ -36,7 +34,6 @@ export const getInterviewReportById = async (interviewId) => {
     return response.data;
 };
 
-// Get all interview reports
 export const getAllInterviewReports = async () => {
 
     const response = await api.get("/api/interview/");
@@ -44,7 +41,6 @@ export const getAllInterviewReports = async () => {
     return response.data;
 };
 
-// Generate resume PDF
 export const generateResumePdf = async ({ interviewReportId }) => {
 
     const response = await api.post(

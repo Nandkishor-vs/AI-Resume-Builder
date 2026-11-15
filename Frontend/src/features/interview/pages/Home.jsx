@@ -67,7 +67,6 @@ const handleGenerateReport = async () => {
 
   return (
     <div className="home-page">
-      {/* Page Header */}
       <header className="page-header">
         <h1>
           Create Your Custom <span className="highlight">Interview Plan</span>
@@ -78,10 +77,8 @@ const handleGenerateReport = async () => {
         </p>
       </header>
 
-      {/* Main Card */}
       <div className="interview-card">
         <div className="interview-card__body">
-          {/* Left Panel - Job Description */}
           <div className="panel panel--left">
             <div className="panel__header">
               <span className="panel__icon">
@@ -116,10 +113,8 @@ const handleGenerateReport = async () => {
 </div>
           </div>
 
-          {/* Vertical Divider */}
           <div className="panel-divider" />
 
-          {/* Right Panel - Profile */}
           <div className="panel panel--right">
             <div className="panel__header">
               <span className="panel__icon">
@@ -141,7 +136,6 @@ const handleGenerateReport = async () => {
               <h2>Your Profile</h2>
             </div>
 
-            {/* Upload Resume */}
             <div className="upload-section">
               <label className="section-label">
                 Upload Resume
@@ -180,12 +174,10 @@ const handleGenerateReport = async () => {
               </label>
             </div>
 
-            {/* OR Divider */}
             <div className="or-divider">
               <span>OR</span>
             </div>
 
-            {/* Quick Self-Description */}
             <div className="self-description">
               <label className="section-label" htmlFor="selfDescription">
                 Quick Self-Description
@@ -201,7 +193,6 @@ const handleGenerateReport = async () => {
               />
             </div>
 
-            {/* Info Box */}
             <div className="info-box">
               <span className="info-box__icon">
                 <svg
@@ -239,7 +230,6 @@ const handleGenerateReport = async () => {
           </div>
         </div>
 
-        {/* Card Footer */}
         <div className="interview-card__footer">
           <span className="footer-info">
             AI-Powered Strategy Generation &bull; Approx 30s
@@ -259,7 +249,6 @@ const handleGenerateReport = async () => {
         </div>
       </div>
 
-      {/* Recent Reports List */}
       {reports.length > 0 && (
         <section className="recent-reports">
           <h2>My Recent Interview Plans</h2>
@@ -285,7 +274,6 @@ const handleGenerateReport = async () => {
         </section>
       )}
 
-      {/* Page Footer */}
       <footer className="page-footer">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>

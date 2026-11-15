@@ -153,7 +153,7 @@ Every array must follow the exact object structure defined above.
 
     const response = await ai.models.generateContent({
 
-        model: "gemini-4-carbon",
+        model: "gemini-3-flash-preview",
 
         contents: prompt,
 
@@ -175,7 +175,6 @@ Every array must follow the exact object structure defined above.
         JSON.stringify(aiResponse, null, 2)
     );
 
-    // Validate the actual Gemini response
     const validatedResponse = interviewReportSchema.parse(aiResponse);
 
     return validatedResponse;
@@ -262,7 +261,7 @@ IMPORTANT:
 
     const response = await ai.models.generateContent({
 
-        model: "gemini-4-carbon",
+        model: "gemini-3-flash-preview",
 
         contents: prompt,
 
