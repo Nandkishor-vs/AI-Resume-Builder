@@ -3,59 +3,60 @@ const { z } = require("zod");
 const puppeteer = require("puppeteer");
 
 const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY,
+  apiKey: process.env.GOOGLE_GENAI_API_KEY,
 });
 
 const interviewReportSchema = z.object({
-
-    matchScore: z.number()
-        .min(0)
-        .max(100)
-        .describe("A score between 0 and 100 indicating how well the candidate matches the job"),
-
-    technicalQuestions: z.array(
-        z.object({
-            question: z.string(),
-            intention: z.string(),
-            answer: z.string(),
-        })
+  matchScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      "A score between 0 and 100 indicating how well the candidate matches the job",
     ),
 
-    behavioralQuestions: z.array(
-        z.object({
-            question: z.string(),
-            intention: z.string(),
-            answer: z.string(),
-        })
-    ),
+  technicalQuestions: z.array(
+    z.object({
+      question: z.string(),
+      intention: z.string(),
+      answer: z.string(),
+    }),
+  ),
 
-    skillGaps: z.array(
-        z.object({
-            skill: z.string(),
-            severity: z.enum(["low", "medium", "high"]),
-        })
-    ),
+  behavioralQuestions: z.array(
+    z.object({
+      question: z.string(),
+      intention: z.string(),
+      answer: z.string(),
+    }),
+  ),
 
-    preparationPlan: z.array(
-        z.object({
-            day: z.number(),
-            focus: z.string(),
-            tasks: z.array(z.string()),
-        })
-    ),
+  skillGaps: z.array(
+    z.object({
+      skill: z.string(),
+      severity: z.enum(["low", "medium", "high"]),
+    }),
+  ),
 
-    title: z.string()
-        .describe("The actual job title extracted from the job description"),
+  preparationPlan: z.array(
+    z.object({
+      day: z.number(),
+      focus: z.string(),
+      tasks: z.array(z.string()),
+    }),
+  ),
 
+  title: z
+    .string()
+    .describe("The actual job title extracted from the job description"),
 });
 
 async function generateInterviewReport({
-    resume,
-    selfDescription,
-    jobDescription,
+  resume,
+  selfDescription,
+  jobDescription,
 }) {
-
-    const prompt = `
+  const prompt = `
 You are an expert technical interviewer and career advisor.
 
 Analyze the candidate's profile and generate a complete interview preparation report.
@@ -151,89 +152,71 @@ Do not return arrays of strings.
 Every array must follow the exact object structure defined above.
 `;
 
-    const response = await ai.models.generateContent({
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
 
-        model: "gemini-3-flash-preview",
+    contents: prompt,
 
-        contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseJsonSchema: z.toJSONSchema(interviewReportSchema),
+    },
+  });
 
-        config: {
-    responseMimeType: "application/json",
-    responseJsonSchema: z.toJSONSchema(interviewReportSchema),
-},
+  if (!response.text) {
+    throw new Error("Gemini returned an empty response");
+  }
 
-    });
+  const aiResponse = JSON.parse(response.text);
 
-    if (!response.text) {
-        throw new Error("Gemini returned an empty response");
-    }
+  console.log("Gemini Raw Response:", JSON.stringify(aiResponse, null, 2));
 
-    const aiResponse = JSON.parse(response.text);
+  const validatedResponse = interviewReportSchema.parse(aiResponse);
 
-    console.log(
-        "Gemini Raw Response:",
-        JSON.stringify(aiResponse, null, 2)
-    );
-
-    const validatedResponse = interviewReportSchema.parse(aiResponse);
-
-    return validatedResponse;
+  return validatedResponse;
 }
 
 async function generatePdfFromHtml(htmlContent) {
-
-    const browser = await puppeteer.launch({
+  const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-});
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
 
-    try {
+  try {
+    const page = await browser.newPage();
 
-        const page = await browser.newPage();
+    await page.setContent(htmlContent, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
 
-        await page.setContent(htmlContent, {
-            waitUntil: "networkidle0",
-        });
+    const pdfBuffer = await page.pdf({
+      format: "A4",
 
-        const pdfBuffer = await page.pdf({
+      printBackground: true,
 
-            format: "A4",
+      margin: {
+        top: "20mm",
+        bottom: "20mm",
+        left: "15mm",
+        right: "15mm",
+      },
+    });
 
-            printBackground: true,
-
-            margin: {
-                top: "20mm",
-                bottom: "20mm",
-                left: "15mm",
-                right: "15mm",
-            },
-
-        });
-
-        return pdfBuffer;
-
-    } finally {
-
-        await browser.close();
-
-    }
-
+    return pdfBuffer;
+  } finally {
+    await browser.close();
+  }
 }
 
 const resumePdfSchema = z.object({
-
-    html: z.string()
-        .describe("Complete professional HTML resume with CSS styling"),
-
+  html: z
+    .string()
+    .describe("Complete professional HTML resume with CSS styling"),
 });
 
-async function generateResumePdf({
-    resume,
-    selfDescription,
-    jobDescription,
-}) {
-
-    const prompt = `Generate a professional resume in HTML for a candidate with the following details:
+async function generateResumePdf({ resume, selfDescription, jobDescription }) {
+  const prompt = `Generate a professional resume in HTML for a candidate with the following details:
 
 Resume: ${resume}
 
@@ -259,32 +242,27 @@ IMPORTANT:
 - Include CSS styling inside the HTML document.
 `;
 
-    const response = await ai.models.generateContent({
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
 
-        model: "gemini-3-flash-preview",
+    contents: prompt,
 
-        contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseJsonSchema: z.toJSONSchema(resumePdfSchema),
+    },
+  });
 
-        config: {
-            responseMimeType: "application/json",
-            responseJsonSchema: z.toJSONSchema(resumePdfSchema),
-        },
+  console.log("Gemini Resume Response:", response.text);
 
-    });
+  const jsonContent = resumePdfSchema.parse(JSON.parse(response.text));
 
-    console.log("Gemini Resume Response:", response.text);
+  const pdfBuffer = await generatePdfFromHtml(jsonContent.html);
 
-    const jsonContent = resumePdfSchema.parse(
-        JSON.parse(response.text)
-    );
-
-    const pdfBuffer = await generatePdfFromHtml(jsonContent.html);
-
-    return pdfBuffer;
-
+  return pdfBuffer;
 }
 
 module.exports = {
-    generateInterviewReport,
-    generateResumePdf,
+  generateInterviewReport,
+  generateResumePdf,
 };
